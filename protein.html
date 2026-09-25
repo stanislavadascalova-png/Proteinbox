@@ -1,0 +1,791 @@
+function App() {
+  const [activeDay, setActiveDay] = React.useState('wed');
+  const [activeMealIndex, setActiveMealIndex] = React.useState(0);
+  const [cookingDaysPerWeek, setCookingDaysPerWeek] = React.useState(5);
+  const [takeawayCostPerMeal, setTakeawayCostPerMeal] = React.useState(18);
+  const [activeFaq, setActiveFaq] = React.useState(null);
+
+  // Сметки за интерактивния калкулатор
+  const hoursSpentPerWeek = cookingDaysPerWeek * 2.2; // 2.2 часа средно пазаруване, готвене и миене на ден
+  const monthlyTakeawayCost = cookingDaysPerWeek * 4.2 * takeawayCostPerMeal;
+  const proteinBoxMonthlyEquivalent = cookingDaysPerWeek * 4.2 * 39; // прибл. 39 лв на ден (4 ястия)
+  const hoursPerMonthSaved = Math.round(hoursSpentPerWeek * 4.2);
+
+  const daysData = {
+    wed: {
+      name: 'Сряда',
+      date: '24 Септември',
+      totalKcal: 1780,
+      macros: { protein: '142g', carbs: '165g', fats: '54g' },
+      meals: [
+        {
+          time: '08:00',
+          type: 'Закуска',
+          title: 'Протеинова купа с фини овесени ядки, ванилия и горски боровинки',
+          desc: 'Сложени чия семена, органичен суроватъчен изолат и пресни плодове за постепенно освобождаване на енергия без инсулинов срив.',
+          kcal: '420 kcal',
+          p: '32g',
+          c: '52g',
+          f: '9g',
+          weight: '340g'
+        },
+        {
+          time: '12:30',
+          type: 'Обяд',
+          title: 'Сочно филе от свободно отглеждано пиле с див ориз и задушени броколи',
+          desc: 'Приготвено на бавен огън със свеж розмарин и студено пресован зехтин. Лесно за храносмилане, без тежест по време на работния следобед.',
+          kcal: '560 kcal',
+          p: '48g',
+          c: '58g',
+          f: '14g',
+          weight: '420g'
+        },
+        {
+          time: '16:00',
+          type: 'Снак',
+          title: 'Домашен протеинов бар с хрупкави бадеми и 85% черен шоколад',
+          desc: 'Перфектната следобедна пауза срещу глада за сладко. Без добавена захар или изкуствени подсладители.',
+          kcal: '280 kcal',
+          p: '18g',
+          c: '21g',
+          f: '12g',
+          weight: '90g'
+        },
+        {
+          time: '19:30',
+          type: 'Вечеря',
+          title: 'Стек от атлантическа дива сьомга върху киноа и хрупкави зелени аспержи',
+          desc: 'Богата на омега-3 мастни киселини за оптимално мускулно възстановяване и спокоен нощен сън.',
+          kcal: '520 kcal',
+          p: '44g',
+          c: '34g',
+          f: '19g',
+          weight: '380g'
+        }
+      ]
+    },
+    thu: {
+      name: 'Четвъртък',
+      date: '25 Септември',
+      totalKcal: 1810,
+      macros: { protein: '146g', carbs: '158g', fats: '56g' },
+      meals: [
+        {
+          time: '08:00',
+          type: 'Закуска',
+          title: 'Протеинови палачинки от яйчен белтък и овес с малини',
+          desc: 'Пухкава текстура, приготвена без олио, гарнирана с пюре от пресни малини и семена.',
+          kcal: '410 kcal',
+          p: '34g',
+          c: '48g',
+          f: '8g',
+          weight: '320g'
+        },
+        {
+          time: '12:30',
+          type: 'Обяд',
+          title: 'Крехко печено телешко Black Angus със сладки картофи',
+          desc: 'Запечени с пресни билки сладки картофи и крехко телешко месо за максимална сила и желязо.',
+          kcal: '590 kcal',
+          p: '52g',
+          c: '54g',
+          f: '18g',
+          weight: '430g'
+        },
+        {
+          time: '16:00',
+          type: 'Снак',
+          title: 'Гръцки протеинов крем с орехи и био пчелен мед',
+          desc: 'Високопротеинов следобеден десерт с висока биологична стойност.',
+          kcal: '270 kcal',
+          p: '20g',
+          c: '18g',
+          f: '11g',
+          weight: '180g'
+        },
+        {
+          time: '19:30',
+          type: 'Вечеря',
+          title: 'Пуешко филе на грил със свежа салата, авокадо и семена',
+          desc: 'Лека протеинова вечеря за бързо усвояване.',
+          kcal: '540 kcal',
+          p: '40g',
+          c: '38g',
+          f: '19g',
+          weight: '390g'
+        }
+      ]
+    },
+    fri: {
+      name: 'Петък',
+      date: '26 Септември',
+      totalKcal: 1750,
+      macros: { protein: '140g', carbs: '162g', fats: '52g' },
+      meals: [
+        {
+          time: '08:00',
+          type: 'Закуска',
+          title: 'Омлет от фермерски яйца с бейби спанак и козе сирене',
+          desc: 'Приготвен на пара със свежи листа спанак и фино козе сирене.',
+          kcal: '390 kcal',
+          p: '35g',
+          c: '12g',
+          f: '21g',
+          weight: '310g'
+        },
+        {
+          time: '12:30',
+          type: 'Обяд',
+          title: 'Филе от бяла риба на фурна с ароматен булгур и билки',
+          desc: 'Крехка риба с богати на фибри въглехидрати.',
+          kcal: '540 kcal',
+          p: '46g',
+          c: '56g',
+          f: '12g',
+          weight: '410g'
+        },
+        {
+          time: '16:00',
+          type: 'Снак',
+          title: 'Чиа пудинг с бадемово мляко и сурови какаови парченца',
+          desc: 'Свеж антиоксидантен заряд за края на работната седмица.',
+          kcal: '290 kcal',
+          p: '15g',
+          c: '26g',
+          f: '13g',
+          weight: '200g'
+        },
+        {
+          time: '19:30',
+          type: 'Вечеря',
+          title: 'Терияки пилешки късчета със задушени тиквички и ориз',
+          desc: 'Класически баланс без тежки захарни сосове.',
+          kcal: '530 kcal',
+          p: '44g',
+          c: '68g',
+          f: '6g',
+          weight: '420g'
+        }
+      ]
+    }
+  };
+
+  const faqs = [
+    {
+      q: 'Кога и как пристига храната в Плевен?',
+      a: 'Наш куриер доставя кутиите всяка делнична сутрин между 07:30 и 09:30 ч. директно до вашия вход или офис рецепция. Храната е херметически запечатана в термокутии със сух лед.'
+    },
+    {
+      q: 'Какво става, ако пътувам или искам да пропусна ден?',
+      a: 'Имате 100% контрол. Достатъчно е да ни изпратите съобщение до 14:00 ч. предния ден, и този ден автоматично се прехвърля напред. Не губите нито едно заплатено ястие.'
+    },
+    {
+      q: 'Как мога да платя?',
+      a: 'Поддържаме наложен платеж — плащате в брой или с карта на куриера при получаване на първия ден, както и по банков път.'
+    },
+    {
+      q: 'Каква е гаранцията за вкуса и грамажа?',
+      a: 'Ако първото ви меню не оправдае очакванията ви за свежест и качество, ни уведомете веднага — следващото ви дневно меню е за наша сметка.'
+    }
+  ];
+
+  const currentDay = daysData[activeDay];
+  const activeMeal = currentDay.meals[activeMealIndex];
+
+  return (
+    <div className="min-h-screen bg-stone-50 text-stone-900 font-inter antialiased selection:bg-emerald-100 selection:text-emerald-900">
+
+      {/* Горна лента: Лимит и локация */}
+      <div className="bg-stone-950 text-stone-300 text-xs py-2 px-4 border-b border-stone-800">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+          <div className="flex items-center space-x-2">
+            <span className="w-2 h-2 bg-emerald-500 rounded-none animate-pulse"></span>
+            <span className="font-semibold text-white uppercase tracking-wider text-[11px]">Гр. Плевен • Седмичен капацитет</span>
+            <span className="text-stone-400">| Свободни абонаменти за следващата седмица:</span>
+            <span className="bg-emerald-900/60 text-emerald-300 font-bold px-1.5 py-0.5 border border-emerald-700/50">4 места</span>
+          </div>
+          <div className="text-stone-400 text-[11px]">
+            Сутрешна безплатна доставка 07:30 - 09:30 ч. • Наложен платеж
+          </div>
+        </div>
+      </div>
+
+      {/* Навигация */}
+      <header className="border-b border-stone-200 bg-white sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            <span className="text-2xl font-black tracking-tight text-stone-950 font-grotesk">
+              PROTEIN<span className="text-emerald-700">BOX</span>
+            </span>
+            <span className="hidden sm:inline-block text-[10px] uppercase font-mono tracking-widest text-stone-600 border-l border-stone-300 pl-3">
+              Daily Gourmet Nutrition
+            </span>
+          </div>
+
+          <nav className="hidden md:flex items-center space-x-8 text-xs uppercase tracking-wider font-semibold text-stone-600">
+            <a href="#taste" className="hover:text-stone-950 transition-colors">Ястията днес</a>
+            <a href="#calculator" className="hover:text-stone-950 transition-colors">Калкулатор на време</a>
+            <a href="#plans" className="hover:text-stone-950 transition-colors">Планове & Цени</a>
+            <a href="#faq" className="hover:text-stone-950 transition-colors">ЧЗВ</a>
+          </nav>
+
+          <a 
+            href="#plans" 
+            className="inline-flex items-center px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-stone-950 hover:bg-emerald-800 transition-colors"
+          >
+            Заяви Меню
+          </a>
+        </div>
+      </header>
+
+      {/* Hero: Незабавно визуално изкушение и оферта */}
+      <section className="border-b border-stone-200 bg-white py-14 lg:py-20">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+
+          <div className="lg:col-span-7 space-y-6">
+            <div className="inline-flex items-center space-x-2 border border-emerald-200 bg-emerald-50/60 px-3 py-1 text-xs uppercase tracking-widest text-emerald-900 font-semibold">
+              <i className="fa-solid fa-shield-halved text-emerald-700"></i>
+              <span>Без компромис в качеството • Точни макроси</span>
+            </div>
+
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-stone-950 leading-[1.08] text-balance">
+              Яжте като в ресторант. Изглеждайте като атлет.
+            </h1>
+
+            <p className="text-stone-600 text-base sm:text-lg max-w-xl leading-relaxed text-pretty">
+              Край на сухия пилешки ориз в пластмаса и безкрайното миене на съдове. Получавайте всяка делнична сутрин в Плевен 4 гурме ястия, сготвени от шеф-готвачи и прецизно изчислени за максимална енергия и топ форма.
+            </p>
+
+            <div className="pt-2 flex flex-col sm:flex-row gap-3">
+              <a 
+                href="#plans" 
+                className="inline-flex justify-center items-center px-7 py-4 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-wider transition-colors"
+              >
+                Запази място за следващата седмица
+              </a>
+              <a 
+                href="#taste" 
+                className="inline-flex justify-center items-center px-6 py-4 border border-stone-300 hover:border-stone-900 text-stone-900 font-bold text-xs uppercase tracking-wider transition-colors bg-stone-50"
+              >
+                Виж съставките на днешните ястия
+              </a>
+            </div>
+
+            {/* Доверие и гаранция */}
+            <div className="pt-4 flex flex-wrap items-center gap-6 text-xs text-stone-600 font-medium">
+              <div className="flex items-center space-x-2">
+                <i className="fa-solid fa-check text-emerald-700"></i>
+                <span>Без абонаментен договор</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <i className="fa-solid fa-check text-emerald-700"></i>
+                <span>Наложен платеж на вратата</span>
+              </div>
+              <div className="flex items-center space-x-2">
+                <i className="fa-solid fa-check text-emerald-700"></i>
+                <span>Паузиране с 1 съобщение</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Визуална карта на ястието */}
+          <div className="lg:col-span-5">
+            <div className="border border-stone-200 bg-stone-50 p-3 relative">
+              <div className="relative overflow-hidden">
+                <img 
+                  src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhiE519Q6ECjQZKo6kgH-DzTvPq1aq0ZIhMobtR6o90IHC_Nm4n1FQBYm1Cc0hBD1zve2e4jfe7C17nJUz34SoV0Ix_HiJdNTClR4Q7eQl-ABH_yrl6wZTVYiwm1rh7AcnJzVvy3jWlDgu09o7xwL37u_CQgNELrWkVCRvm37IgOVnYxbIcEwFj/s16000-rw/%D0%9F%D0%B5%D1%87%D0%B5%D0%BD%D0%BE%20%D1%81%D0%B8%D1%80%D0%B5%D0%BD%D0%B5%20%D1%81%20%D0%BC%D0%B5%D0%B4%20%D0%B8%20%D1%81%D1%83%D1%81%D0%B0%D0%BC%205.jpg" 
+                  alt="Печено филе от сьомга с пресни аспержи и сос от билки" 
+                  className="w-full h-80 object-cover"
+                />
+                <div className="absolute top-3 left-3 bg-stone-950/90 text-white text-[10px] uppercase font-mono tracking-widest px-2.5 py-1">
+                  Прясно приготвено днес
+                </div>
+              </div>
+
+              <div className="p-4 bg-white border border-stone-200 mt-3 space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-xs uppercase font-mono tracking-wider text-emerald-800 font-bold">Вечеря (19:30)</span>
+                  <span className="text-xs font-mono font-bold text-stone-950">520 kcal</span>
+                </div>
+                <h4 className="text-base font-bold text-stone-950">
+                  Атлантическа дива сьомга със зелени аспержи
+                </h4>
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-stone-100 text-center font-mono text-xs">
+                  <div className="bg-stone-50 py-1.5 border border-stone-200">
+                    <span className="text-stone-500 block text-[10px]">ПРОТЕИН</span>
+                    <span className="font-bold text-stone-950">44g</span>
+                  </div>
+                  <div className="bg-stone-50 py-1.5 border border-stone-200">
+                    <span className="text-stone-500 block text-[10px]">ВЪГЛЕХИДРАТИ</span>
+                    <span className="font-bold text-stone-950">34g</span>
+                  </div>
+                  <div className="bg-stone-50 py-1.5 border border-stone-200">
+                    <span className="text-stone-500 block text-[10px]">МАЗНИНИ</span>
+                    <span className="font-bold text-stone-950">19g</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* Интерактивен калкулатор: Колко време и пари печели клиентът */}
+      <section id="calculator" className="py-16 bg-stone-900 text-stone-100 border-b border-stone-800">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="max-w-2xl mb-10">
+            <span className="text-xs uppercase tracking-widest text-emerald-400 font-bold font-mono">
+              ИНТЕРАКТИВЕН КАЛКУЛАТОР ЗА ЕФЕКТИВНОСТ
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mt-2">
+              Колко всъщност ви струва самостоятелното хранене?
+            </h2>
+            <p className="text-stone-400 text-sm mt-2">
+              Повечето хора подценяват изгубените часове в пазаруване, готвене и парите за случайни междинни храни. Проверете вашите числа:
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-stone-950 border border-stone-800 p-6 md:p-10">
+
+            {/* Контроли за плъзгачите */}
+            <div className="lg:col-span-7 space-y-8">
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-semibold text-stone-200">
+                    Колко дни в седмицата пазарувате и готвите сами?
+                  </label>
+                  <span className="text-lg font-bold font-mono text-emerald-400">{cookingDaysPerWeek} дни</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="2" 
+                  max="7" 
+                  value={cookingDaysPerWeek} 
+                  onChange={(e) => setCookingDaysPerWeek(Number(e.target.value))}
+                  className="w-full accent-emerald-500 cursor-pointer h-2 bg-stone-800 rounded-none"
+                />
+                <div className="flex justify-between text-[11px] text-stone-400 mt-1 font-mono">
+                  <span>2 дни</span>
+                  <span>5 работни дни</span>
+                  <span>7 дни (всеки ден)</span>
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <label className="text-sm font-semibold text-stone-200">
+                    Средна цена, която плащате за обяд навън или доставка:
+                  </label>
+                  <span className="text-lg font-bold font-mono text-emerald-400">{takeawayCostPerMeal} лв.</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="12" 
+                  max="35" 
+                  step="1"
+                  value={takeawayCostPerMeal} 
+                  onChange={(e) => setTakeawayCostPerMeal(Number(e.target.value))}
+                  className="w-full accent-emerald-500 cursor-pointer h-2 bg-stone-800 rounded-none"
+                />
+                <div className="flex justify-between text-[11px] text-stone-400 mt-1 font-mono">
+                  <span>12 лв (бърза закуска)</span>
+                  <span>20 лв (стандартно обедно)</span>
+                  <span>35 лв (гурме/ресторант)</span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-stone-900/80 border border-stone-800 text-xs text-stone-400 leading-relaxed">
+                <i className="fa-solid fa-circle-info text-emerald-400 mr-2"></i>
+                Изчисленията включват средно 2.2 часа на ден, прекарани в супермаркета, приготвяне на месо и зеленчуци, мерене на калории и миене на тави.
+              </div>
+            </div>
+
+            {/* Резултатен блок */}
+            <div className="lg:col-span-5 bg-stone-900 border border-stone-800 p-6 space-y-6">
+              <span className="text-[11px] uppercase tracking-widest text-stone-400 font-mono block border-b border-stone-800 pb-2">
+                Вашият месечен баланс с ProteinBox
+              </span>
+
+              <div>
+                <div className="text-4xl md:text-5xl font-black font-mono text-emerald-400 tabular-nums">
+                  +{hoursPerMonthSaved} часа
+                </div>
+                <div className="text-xs uppercase tracking-wider text-stone-300 font-semibold mt-1">
+                  Спестено лично време всеки месец
+                </div>
+                <p className="text-xs text-stone-400 mt-1">
+                  Това са равнява на почти две пълни свободни денонощия за спорт, семейство или бизнес.
+                </p>
+              </div>
+
+              <div className="border-t border-stone-800 pt-4">
+                <div className="text-2xl font-bold font-mono text-white tabular-nums">
+                  0 стрес и 100% точност
+                </div>
+                <p className="text-xs text-stone-400 mt-1">
+                  Получавате 4 чисти хранения на ден, без нито веднъж да включвате котлона или да се чудите какво да ядете.
+                </p>
+              </div>
+
+              <a 
+                href="#plans" 
+                className="block text-center py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs uppercase tracking-wider transition-colors"
+              >
+                Освободете си времето сега
+              </a>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Интерактивен детайлен преглед на менюто */}
+      <section id="taste" className="py-16 md:py-24 border-b border-stone-200 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
+            <div>
+              <span className="text-xs uppercase tracking-widest text-emerald-800 font-bold font-mono">
+                ДНЕВНО МЕНЮ И СЪСТАВКИ
+              </span>
+              <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-stone-950 mt-2">
+                Без тайни съставки. Пълна прозрачност до грам.
+              </h2>
+            </div>
+
+            {/* Бутони за смяна на дните */}
+            <div className="inline-flex border border-stone-300 divide-x divide-stone-300 bg-stone-100">
+              {['wed', 'thu', 'fri'].map((dKey) => (
+                <button
+                  key={dKey}
+                  onClick={() => {
+                    setActiveDay(dKey);
+                    setActiveMealIndex(0);
+                  }}
+                  className={`px-5 py-2.5 text-xs uppercase tracking-wider font-bold transition-colors ${
+                    activeDay === dKey ? 'bg-stone-950 text-white' : 'text-stone-700 hover:bg-stone-200'
+                  }`}
+                >
+                  {daysData[dKey].name}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Макронутриенти лента */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 bg-stone-100 border border-stone-200 mb-8 font-mono text-center sm:text-left">
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-stone-500 block">Калориен баланс</span>
+              <span className="text-2xl font-bold text-stone-950">{currentDay.totalKcal} kcal</span>
+            </div>
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-stone-500 block">Дневен протеин</span>
+              <span className="text-2xl font-bold text-emerald-800">{currentDay.macros.protein}</span>
+            </div>
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-stone-500 block">Чисти въглехидрати</span>
+              <span className="text-2xl font-bold text-stone-950">{currentDay.macros.carbs}</span>
+            </div>
+            <div>
+              <span className="text-[11px] uppercase tracking-wider text-stone-500 block">Полезни мазнини</span>
+              <span className="text-2xl font-bold text-stone-950">{currentDay.macros.fats}</span>
+            </div>
+          </div>
+
+          {/* Интерактивен сплит: Избор на ястие вляво, детайл вдясно */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+            {/* Ляв панел: Списък с 4-те ястия за деня */}
+            <div className="lg:col-span-7 border border-stone-200 divide-y divide-stone-200 bg-white">
+              {currentDay.meals.map((meal, index) => {
+                const isSelected = activeMealIndex === index;
+                return (
+                  <div 
+                    key={index}
+                    onClick={() => setActiveMealIndex(index)}
+                    className={`p-5 cursor-pointer transition-colors flex items-start justify-between gap-4 ${
+                      isSelected ? 'bg-emerald-50/70 border-l-4 border-l-emerald-700' : 'hover:bg-stone-50'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center space-x-2 text-xs font-mono mb-1">
+                        <span className="bg-stone-200 text-stone-800 px-2 py-0.5 font-bold uppercase">{meal.time}</span>
+                        <span className="text-emerald-800 font-bold uppercase tracking-wider">{meal.type}</span>
+                        <span className="text-stone-400">• {meal.weight}</span>
+                      </div>
+                      <h4 className="text-base font-bold text-stone-950 mt-1">
+                        {meal.title}
+                      </h4>
+                    </div>
+
+                    <div className="text-right font-mono flex-shrink-0">
+                      <span className="text-sm font-black text-stone-950 block">{meal.kcal}</span>
+                      <span className="text-[11px] text-emerald-800 font-semibold">{meal.p} прот.</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Десен панел: Детайлна карта на избраното ястие */}
+            <div className="lg:col-span-5 border border-stone-200 bg-stone-50 p-6 space-y-4">
+              <span className="text-xs font-mono uppercase tracking-widest text-emerald-800 font-bold block border-b border-stone-200 pb-2">
+                {activeMeal.type} — Фокус и хранителна стойност
+              </span>
+
+              <h3 className="text-xl font-extrabold text-stone-950">
+                {activeMeal.title}
+              </h3>
+
+              <p className="text-sm text-stone-600 leading-relaxed">
+                {activeMeal.desc}
+              </p>
+
+              <div className="border-t border-stone-200 pt-4">
+                <div className="text-xs font-mono text-stone-500 uppercase tracking-wider mb-2">
+                  Детайлен профил на порцията ({activeMeal.weight}):
+                </div>
+                <div className="grid grid-cols-3 gap-2 text-center font-mono text-xs">
+                  <div className="bg-white border border-stone-200 py-2">
+                    <span className="text-stone-500 block text-[10px]">БЕЛТЪЧИНИ</span>
+                    <span className="font-bold text-emerald-800 text-sm">{activeMeal.p}</span>
+                  </div>
+                  <div className="bg-white border border-stone-200 py-2">
+                    <span className="text-stone-500 block text-[10px]">ВЪГЛЕХИДРАТИ</span>
+                    <span className="font-bold text-stone-950 text-sm">{activeMeal.c}</span>
+                  </div>
+                  <div className="bg-white border border-stone-200 py-2">
+                    <span className="text-stone-500 block text-[10px]">МАЗНИНИ</span>
+                    <span className="font-bold text-stone-950 text-sm">{activeMeal.f}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white p-3 border border-stone-200 text-xs text-stone-500 space-y-1">
+                <div className="flex items-center space-x-2">
+                  <i className="fa-solid fa-leaf text-emerald-600"></i>
+                  <span>0% рафинирана захар и изкуствени овкусители</span>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <i className="fa-solid fa-scale-balanced text-emerald-600"></i>
+                  <span>Мерено по сурово тегло за точност на калориите</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Ценови абонаменти */}
+      <section id="plans" className="py-16 md:py-24 border-b border-stone-200 bg-stone-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center max-w-2xl mx-auto mb-16 space-y-3">
+            <span className="text-xs uppercase tracking-widest text-emerald-800 font-bold font-mono">
+              ПЛАНОВЕ БЕЗ ОБВЪРЗВАНЕ
+            </span>
+            <h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-stone-950">
+              Инвестирайте в тялото и продуктивността си
+            </h2>
+            <p className="text-stone-600 text-sm md:text-base">
+              Всеки пакет включва безплатна сутрешна доставка в Плевен и право на паузиране.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
+
+            {/* План 1: Пробен */}
+            <div className="border border-stone-300 bg-white p-8 flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-widest text-stone-500">За нов старт</span>
+                <h3 className="text-2xl font-bold text-stone-950 mt-1">3 Дни Тест</h3>
+                <p className="text-xs text-stone-500 mt-2 mb-6">Валидност: 7 дни от първата доставка</p>
+
+                <div className="border-t border-b border-stone-100 py-4 mb-6">
+                  <div className="text-3xl font-extrabold text-stone-950 tabular-nums">50.00 €</div>
+                  <div className="text-xs text-stone-500 mt-1">~ 97.79 лв. (16.66 € на ден за 4 пълни ястия)</div>
+                </div>
+
+                <ul className="space-y-3 text-sm text-stone-700 mb-8">
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>3 пълни дневни пакета (общо 12 ястия)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>Безплатна сутрешна доставка до офис или дом</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>Смяна на дати с 24ч предизвестие</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>Наложен платеж при получаване</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button className="w-full py-3.5 border border-stone-900 text-stone-950 font-bold text-xs uppercase tracking-wider hover:bg-stone-900 hover:text-white transition-colors">
+                Заяви 3-дневен тест
+              </button>
+            </div>
+
+            {/* План 2: Бестселър */}
+            <div className="border-2 border-emerald-700 bg-white p-8 flex flex-col justify-between relative shadow-sm">
+              <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-emerald-700 text-white text-[10px] uppercase tracking-widest font-bold px-3 py-1">
+                Изборът на 82% от клиентите
+              </div>
+
+              <div>
+                <span className="text-xs font-mono uppercase tracking-widest text-emerald-800 font-bold">
+                  Работна седмица (Пон - Пет)
+                </span>
+                <h3 className="text-2xl font-bold text-stone-950 mt-1">5 Дни Пълен фокус</h3>
+                <p className="text-xs text-stone-500 mt-2 mb-6">Валидност: 10 дни от първата доставка</p>
+
+                <div className="border-t border-b border-stone-100 py-4 mb-6">
+                  <div className="text-3xl font-extrabold text-stone-950 tabular-nums">100.00 €</div>
+                  <div className="text-xs text-stone-500 mt-1">~ 195.58 лв. (20.00 € на ден за 4 пълни ястия)</div>
+                </div>
+
+                <ul className="space-y-3 text-sm text-stone-700 mb-8">
+                  <li className="flex items-start font-semibold text-stone-950">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>5 пълни дни без пазаруване и готвене</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>Спестявате над 10 часа лично време</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>140g+ чист протеин всеки ден</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>Възможност за замразяване на дни при пътуване</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button className="w-full py-3.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs uppercase tracking-wider transition-colors">
+                Поръчай Седмичен Абонамент
+              </button>
+            </div>
+
+            {/* План 3: Максимум трансформация */}
+            <div className="border border-stone-300 bg-white p-8 flex flex-col justify-between">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-widest text-stone-500">Трансформация</span>
+                <h3 className="text-2xl font-bold text-stone-950 mt-1">10 Дни Резултат</h3>
+                <p className="text-xs text-stone-500 mt-2 mb-6">Валидност: 20 дни от първата доставка</p>
+
+                <div className="border-t border-b border-stone-100 py-4 mb-6">
+                  <div className="flex items-baseline space-x-2">
+                    <div className="text-3xl font-extrabold text-stone-950 tabular-nums">180.00 €</div>
+                    <div className="text-sm line-through text-stone-400">200.00 €</div>
+                  </div>
+                  <div className="text-xs text-emerald-700 font-semibold mt-1">Спестявате 10% (~ 352.05 лв.)</div>
+                </div>
+
+                <ul className="space-y-3 text-sm text-stone-700 mb-8">
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>10 пълни дневни пакета (общо 40 ястия)</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>Голям 20-дневен прозорец за използване</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>Приоритетен сутрешен час на доставка</span>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-emerald-700 mr-2 font-bold">✓</span>
+                    <span>Най-изгодна цена за ден</span>
+                  </li>
+                </ul>
+              </div>
+
+              <button className="w-full py-3.5 border border-stone-900 text-stone-950 font-bold text-xs uppercase tracking-wider hover:bg-stone-900 hover:text-white transition-colors">
+                Заяви 10 Дни с 10% отстъпка
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* Въпроси & Отговори */}
+      <section id="faq" className="py-16 md:py-20 border-b border-stone-200 bg-white">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="mb-10 text-center">
+            <span className="text-xs uppercase tracking-widest text-emerald-800 font-bold font-mono">ЧЕСТО ЗАДАВАНИ ВЪПРОСИ</span>
+            <h2 className="text-3xl font-bold tracking-tight text-stone-950 mt-2">
+              Всичко, което трябва да знаете преди първата доставка
+            </h2>
+          </div>
+
+          <div className="divide-y divide-stone-200 border-t border-b border-stone-200">
+            {faqs.map((faq, idx) => (
+              <div key={idx} className="py-5">
+                <button 
+                  onClick={() => setActiveFaq(activeFaq === idx ? null : idx)}
+                  className="w-full flex justify-between items-center text-left focus:outline-none"
+                >
+                  <span className="font-semibold text-stone-900 text-base">{faq.q}</span>
+                  <span className="text-stone-500 font-mono text-lg ml-4">
+                    {activeFaq === idx ? '−' : '+'}
+                  </span>
+                </button>
+                {activeFaq === idx && (
+                  <p className="mt-3 text-sm text-stone-600 leading-relaxed pr-8">
+                    {faq.a}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Футър */}
+      <footer className="bg-stone-950 text-stone-400 py-12 text-xs border-t border-stone-800">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div>
+            <span className="text-xl font-black text-white tracking-tight font-grotesk">
+              PROTEIN<span className="text-emerald-500">BOX</span>
+            </span>
+            <p className="mt-2 text-stone-400 max-w-xs leading-relaxed">
+              Премиум доставка на чиста, точна и балансирана храна за здраве и висока продуктивност в гр. Плевен.
+            </p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white uppercase tracking-wider mb-3">Локация & Контакт</h4>
+            <p className="mb-1">гр. Плевен, България</p>
+            <p className="mb-1">Телефон за бързи поръчки: +359 88 000 0000</p>
+            <p>Имейл: info@proteinbox.fit</p>
+          </div>
+
+          <div>
+            <h4 className="font-bold text-white uppercase tracking-wider mb-3">График на доставките</h4>
+            <p className="mb-1">Понеделник – Петък: 07:30 – 09:30 ч.</p>
+            <p>Заявки за следващия ден: до 14:00 ч.</p>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 mt-8 pt-6 border-t border-stone-850 text-stone-500 flex flex-col sm:flex-row justify-between">
+          <span>© {new Date().getFullYear()} ProteinBox. Всички права запазени.</span>
+          <div className="space-x-4 mt-2 sm:mt-0">
+            <a href="#" className="hover:text-stone-400">Общи условия</a>
+            <a href="#" className="hover:text-stone-400">Политика за поверителност</a>
+          </div>
+        </div>
+      </footer>
+
+    </div>
+  );
+}
